@@ -1,10 +1,12 @@
 package main
 
 import (
+	"crypto/x509"
 	"fmt"
 	jdocspb "github.com/digital-dream-labs/api/go/jdocspb"
 	grpcserver "github.com/digital-dream-labs/hugh/grpc/server"
 	"github.com/digital-dream-labs/hugh/log"
+	"io/ioutil"
 	"jdocspb/pkg/server"
 )
 
@@ -14,10 +16,17 @@ func main() {
 }
 
 func startServer() {
+	certPool := x509.NewCertPool()
+	var cert, _ = ioutil.ReadFile("../certs/cert.crt")
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Fatal("failed to add server CA's certificate")
+	}
+
 	srv, err := grpcserver.New(
 		grpcserver.WithViper(),
 		grpcserver.WithLogger(log.Base()),
 		grpcserver.WithReflectionService(),
+		grpcserver.WithCertPool(certPool),
 
 		grpcserver.WithUnaryServerInterceptors(
 		//			grpclog.UnaryServerInterceptor(),
