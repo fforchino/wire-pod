@@ -785,8 +785,8 @@ function setupSystemd() {
 	mv wire-pod-token.service /lib/systemd/system/
 	systemctl daemon-reload
 	systemctl enable wire-pod
-	systemctl enable wire-pod-jdocs
-	systemctl enable wire-pod-token
+	#systemctl enable wire-pod-jdocs
+	#systemctl enable wire-pod-token
 	echo
 	echo "systemd service has been installed and enabled! The service is called wire-pod.service"
 	echo

@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-const JDOCS_PATH = "/home/pi/jdocs/"
-
 type options struct {
 	log log.Logger
 }
