@@ -3,7 +3,11 @@ package main
 import (
 	"fmt"
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
+	"github.com/digital-dream-labs/api/go/jdocspb"
+	"github.com/digital-dream-labs/api/go/tokenpb"
+	"github.com/digital-dream-labs/chipper/pkg/jdocs"
 	"github.com/digital-dream-labs/chipper/pkg/server"
+	"github.com/digital-dream-labs/chipper/pkg/token"
 	wp "github.com/digital-dream-labs/chipper/pkg/voice_processors"
 
 	//	grpclog "github.com/digital-dream-labs/hugh/grpc/interceptors/log"
@@ -75,6 +79,11 @@ func startServer() {
 		server.WithIntentGraphProcessor(p),
 	)
 
+	jdocsServer, _ := jdocs.New()
+	tokenServer, _ := token.New()
+
+	jdocspb.RegisterJdocsServer(srv.Transport(), jdocsServer)
+	tokenpb.RegisterTokenServer(srv.Transport(), tokenServer)
 	pb.RegisterChipperGrpcServer(srv.Transport(), s)
 
 	srv.Start()

@@ -597,7 +597,7 @@ function makeSource() {
 		cd certs
 		echo "Creating server_config.json for robot"
 		#echo '{"jdocs": "jdocs.api.anki.com:443", "tms": "token.api.anki.com:443", "chipper": "REPLACEME", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
-		echo '{"jdocs": "REPLACEMETOO:444", "tms": "REPLACEMETOO:445", "chipper": "REPLACEME", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
+		echo '{"jdocs": "REPLACEMETOO:443", "tms": "REPLACEMETOO:443", "chipper": "REPLACEME", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
 		address=$(cat address)
 		sed -i "s/REPLACEME/${address}:${port}/g" server_config.json
 		sed -i "s/REPLACEMETOO/${address}/g" server_config.json
@@ -607,7 +607,7 @@ function makeSource() {
 		cd certs
 		echo "Creating server_config.json for robot"
 		#echo '{"jdocs": "jdocs.api.anki.com:443", "tms": "token.api.anki.com:443", "chipper": "escapepod.local:443", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
-		echo '{"jdocs": "escapepod.local:444", "tms": "escapepod.local:445", "chipper": "escapepod.local:443", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
+		echo '{"jdocs": "escapepod.local:443", "tms": "escapepod.local:443", "chipper": "escapepod.local:443", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
 		cd ..
 	fi
 	echo "Created!"
