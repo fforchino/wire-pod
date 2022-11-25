@@ -725,9 +725,9 @@ function setupSystemd() {
 	cat wire-pod-jdocs.service
 	echo
 	echo "wire-pod-jdocs.service created"
-	cd jdocs
-	/usr/local/go/bin/go build cmd/main.go
-	cd ..
+	#cd jdocs
+	#/usr/local/go/bin/go build cmd/main.go -o jdocs
+	#cd ..
 	### Token Server ###
 	echo "[Unit]" >wire-pod-token.service
 	echo "Description=Wire Escape Pod Token Service" >>wire-pod-token.service
@@ -742,9 +742,9 @@ function setupSystemd() {
 	cat wire-pod-token.service
 	echo
 	echo "wire-pod-token.service created"
-	cd token
-	/usr/local/go/bin/go build cmd/main.go
-	cd ..
+	#cd token
+	#/usr/local/go/bin/go build cmd/main.go -o token
+	#cd ..
 	### CHIPPER ###
 	echo "[Unit]" >wire-pod.service
 	echo "Description=Wire Escape Pod" >>wire-pod.service
