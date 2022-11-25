@@ -725,7 +725,9 @@ function setupSystemd() {
 	cat wire-pod-jdocs.service
 	echo
 	echo "wire-pod-jdocs.service created"
-	echo
+	cd jdocs
+	/usr/local/go/bin/go build cmd/main.go
+	cd ..
 	### Token Server ###
 	echo "[Unit]" >wire-pod-token.service
 	echo "Description=Wire Escape Pod Token Service" >>wire-pod-token.service
@@ -740,10 +742,12 @@ function setupSystemd() {
 	cat wire-pod-token.service
 	echo
 	echo "wire-pod-token.service created"
-	echo
+	cd token
+	/usr/local/go/bin/go build cmd/main.go
+	cd ..
 	### CHIPPER ###
 	echo "[Unit]" >wire-pod.service
-	echo "Description=Wire Escape Pod (coqui)" >>wire-pod.service
+	echo "Description=Wire Escape Pod" >>wire-pod.service
 	echo >>wire-pod.service
 	echo "[Service]" >>wire-pod.service
 	echo "Type=simple" >>wire-pod.service
@@ -777,12 +781,16 @@ function setupSystemd() {
 	echo "./chipper/chipper has been built!"
 	cd ..
 	mv wire-pod.service /lib/systemd/system/
+	mv wire-pod-jdocs.service /lib/systemd/system/
+	mv wire-pod-token.service /lib/systemd/system/
 	systemctl daemon-reload
 	systemctl enable wire-pod
+	systemctl enable wire-pod-jdocs
+	systemctl enable wire-pod-token
 	echo
 	echo "systemd service has been installed and enabled! The service is called wire-pod.service"
 	echo
-	echo "To start the service, run: 'systemctl start wire-pod'"
+	echo "To start the services, run: 'systemctl start wire-pod' 'systemctl start wire-pod-jdocs' 'systemctl start wire-pod-token'"
 	echo "Then, to see logs, run 'journalctl -fe | grep start.sh'"
 }
 
@@ -796,9 +804,21 @@ function disableSystemd() {
 	systemctl stop wire-pod.service
 	systemctl disable wire-pod.service
 	rm -f /lib/systemd/system/wire-pod.service
+	echo
+	echo "Disabling wire-pod-jdocs.service"
+	systemctl stop wire-pod-jdocs.service
+	systemctl disable wire-pod-jdocs.service
+	rm -f /lib/systemd/system/wire-pod-jdocs.service
+	echo
+	echo "Disabling wire-pod-token.service"
+	systemctl stop wire-pod-token.service
+	systemctl disable wire-pod-token.service
+	rm -f /lib/systemd/system/wire-pod-token.service
 	systemctl daemon-reload
 	echo
+	echo "wire-pod-token.service has been removed and disabled."
 	echo "wire-pod.service has been removed and disabled."
+	echo "wire-pod-jdocs.service has been removed and disabled."
 }
 
 function firstPrompt() {

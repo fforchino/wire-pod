@@ -16,4 +16,9 @@ fi
 
 #source source.sh
 
-/usr/local/go/bin/go run cmd/main.go
+if [[ -f ./token ]]; then
+  ./token
+else
+  /usr/local/go/bin/go run cmd/main.go
+fi
+

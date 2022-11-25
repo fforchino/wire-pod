@@ -16,4 +16,9 @@ fi
 
 #source source.sh
 
-/usr/local/go/bin/go run cmd/main.go
+if [[ -f ./jdocs ]]; then
+  ./jdocs
+else
+  /usr/local/go/bin/go run cmd/main.go
+fi
+
