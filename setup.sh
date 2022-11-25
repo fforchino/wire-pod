@@ -597,7 +597,7 @@ function makeSource() {
 		cd certs
 		echo "Creating server_config.json for robot"
 		#echo '{"jdocs": "jdocs.api.anki.com:443", "tms": "token.api.anki.com:443", "chipper": "REPLACEME", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
-		echo '{"jdocs": "REPLACEMETOO:444", "tms": "token.api.anki.com:443", "chipper": "REPLACEME", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
+		echo '{"jdocs": "REPLACEMETOO:444", "tms": "REPLACEMETOO:445", "chipper": "REPLACEME", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
 		address=$(cat address)
 		sed -i "s/REPLACEME/${address}:${port}/g" server_config.json
 		sed -i "s/REPLACEMETOO/${address}/g" server_config.json
@@ -607,7 +607,7 @@ function makeSource() {
 		cd certs
 		echo "Creating server_config.json for robot"
 		#echo '{"jdocs": "jdocs.api.anki.com:443", "tms": "token.api.anki.com:443", "chipper": "escapepod.local:443", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
-		echo '{"jdocs": "escapepod.local:444", "tms": "token.api.anki.com:443", "chipper": "escapepod.local:443", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
+		echo '{"jdocs": "escapepod.local:444", "tms": "escapepod.local:445", "chipper": "escapepod.local:443", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' >server_config.json
 		cd ..
 	fi
 	echo "Created!"
@@ -711,6 +711,37 @@ function setupSystemd() {
   		exit 1
 	fi
 	source ./chipper/source.sh
+	### JDOCS Server ###
+	echo "[Unit]" >wire-pod-jdocs.service
+	echo "Description=Wire Escape Pod JDocs Service" >>wire-pod-jdocs.service
+	echo >>wire-pod-jdocs.service
+	echo "[Service]" >>wire-pod-jdocs.service
+	echo "Type=simple" >>wire-pod-jdocs.service
+	echo "WorkingDirectory=$(readlink -f ./jdocs)" >>wire-pod-jdocs.service
+	echo "ExecStart=$(readlink -f ./jdocs/start.sh)" >>wire-pod-jdocs.service
+	echo >>wire-pod-jdocs.service
+	echo "[Install]" >>wire-pod-jdocs.service
+	echo "WantedBy=multi-user.target" >>wire-pod-jdocs.service
+	cat wire-pod-jdocs.service
+	echo
+	echo "wire-pod-jdocs.service created"
+	echo
+	### Token Server ###
+	echo "[Unit]" >wire-pod-token.service
+	echo "Description=Wire Escape Pod Token Service" >>wire-pod-token.service
+	echo >>wire-pod-token.service
+	echo "[Service]" >>wire-pod-token.service
+	echo "Type=simple" >>wire-pod-token.service
+	echo "WorkingDirectory=$(readlink -f ./token)" >>wire-pod-token.service
+	echo "ExecStart=$(readlink -f ./token/start.sh)" >>wire-pod-token.service
+	echo >>wire-pod-token.service
+	echo "[Install]" >>wire-pod-token.service
+	echo "WantedBy=multi-user.target" >>wire-pod-token.service
+	cat wire-pod-token.service
+	echo
+	echo "wire-pod-token.service created"
+	echo
+	### CHIPPER ###
 	echo "[Unit]" >wire-pod.service
 	echo "Description=Wire Escape Pod (coqui)" >>wire-pod.service
 	echo >>wire-pod.service

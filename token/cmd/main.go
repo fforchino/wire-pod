@@ -3,11 +3,11 @@ package main
 import (
 	"crypto/x509"
 	"fmt"
-	jdocspb "github.com/digital-dream-labs/api/go/jdocspb"
+	tokenpb "github.com/digital-dream-labs/api/go/tokenpb"
 	grpcserver "github.com/digital-dream-labs/hugh/grpc/server"
 	"github.com/digital-dream-labs/hugh/log"
 	"io/ioutil"
-	"jdocspb/pkg/server"
+	"token/pkg/server"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func startServer() {
 	}
 
 	srv, err := grpcserver.New(
-		grpcserver.WithPort(444),
+		grpcserver.WithPort(445),
 		grpcserver.WithViper(),
 		grpcserver.WithLogger(log.Base()),
 		grpcserver.WithReflectionService(),
@@ -43,9 +43,9 @@ func startServer() {
 
 	s, _ := server.New()
 
-	jdocspb.RegisterJdocsServer(srv.Transport(), s)
+	tokenpb.RegisterTokenServer(srv.Transport(), s)
 
 	srv.Start()
-	fmt.Println("\033[33m\033[1mServer started successfully!\033[0m")
+	fmt.Println("\033[33m\033[1mToken Server started successfully!\033[0m")
 	<-srv.Notify(grpcserver.Stopped)
 }

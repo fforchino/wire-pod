@@ -5,7 +5,7 @@ import (
 	"github.com/digital-dream-labs/hugh/log"
 )
 
-const JDOCS_PATH = "/tmp/"
+const JDOCS_PATH = "/home/pi/jdocs/"
 
 type options struct {
 	log log.Logger
