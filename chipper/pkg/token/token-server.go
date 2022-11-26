@@ -31,13 +31,13 @@ func New(opts ...Option) (*TokenServer, error) {
 
 	s := TokenServer{}
 
-	print("Token server created")
+	println("Token server created")
 
 	return &s, nil
 }
 
 func (*TokenServer) AssociatePrimaryUser(ctx context.Context, req *tokenpb.AssociatePrimaryUserRequest) (*tokenpb.AssociatePrimaryUserResponse, error) {
-	print("[AssociatePrimaryUser] " + req.String())
+	println("[AssociatePrimaryUser] " + req.String())
 
 	data := getToken(req.AppId, req.ClientName, req.GenerateStsToken, req.RevokeClientTokens, req.ExpirationMinutes, req.SessionCertificate)
 	response := tokenpb.AssociatePrimaryUserResponse{
@@ -48,7 +48,7 @@ func (*TokenServer) AssociatePrimaryUser(ctx context.Context, req *tokenpb.Assoc
 }
 
 func (*TokenServer) ReassociatePrimaryUser(ctx context.Context, req *tokenpb.ReassociatePrimaryUserRequest) (*tokenpb.ReassociatePrimaryUserResponse, error) {
-	print("[ReassociatePrimaryUser] " + req.String())
+	println("[ReassociatePrimaryUser] " + req.String())
 
 	var cert []byte
 	data := getToken(req.AppId, req.ClientName, req.GenerateStsToken, true, req.ExpirationMinutes, cert)
@@ -60,7 +60,7 @@ func (*TokenServer) ReassociatePrimaryUser(ctx context.Context, req *tokenpb.Rea
 }
 
 func (*TokenServer) AssociateSecondaryClient(ctx context.Context, req *tokenpb.AssociateSecondaryClientRequest) (*tokenpb.AssociateSecondaryClientResponse, error) {
-	print("[AssociateSecondaryClientResponse] " + req.String())
+	println("[AssociateSecondaryClientResponse] " + req.String())
 
 	var cert []byte
 	data := getToken(req.AppId, req.ClientName, false, false, 0, cert)
@@ -72,7 +72,7 @@ func (*TokenServer) AssociateSecondaryClient(ctx context.Context, req *tokenpb.A
 }
 
 func (*TokenServer) DisassociatePrimaryUser(ctx context.Context, req *tokenpb.DisassociatePrimaryUserRequest) (*tokenpb.DisassociatePrimaryUserResponse, error) {
-	print("[DisassociatePrimaryUser] " + req.String())
+	println("[DisassociatePrimaryUser] " + req.String())
 
 	response := tokenpb.DisassociatePrimaryUserResponse{}
 
@@ -80,7 +80,7 @@ func (*TokenServer) DisassociatePrimaryUser(ctx context.Context, req *tokenpb.Di
 }
 
 func (*TokenServer) RefreshToken(ctx context.Context, req *tokenpb.RefreshTokenRequest) (*tokenpb.RefreshTokenResponse, error) {
-	print("[RefreshToken] " + req.String())
+	println("[RefreshToken] " + req.String())
 
 	var cert []byte
 	data := getToken("", "", req.RefreshStsTokens, req.RefreshJwtTokens, req.ExpirationMinutes, cert)
@@ -92,7 +92,7 @@ func (*TokenServer) RefreshToken(ctx context.Context, req *tokenpb.RefreshTokenR
 }
 
 func (*TokenServer) ListRevokedTokens(ctx context.Context, req *tokenpb.ListRevokedTokensRequest) (*tokenpb.ListRevokedTokensResponse, error) {
-	print("[ListRevokedTokens] " + req.String())
+	println("[ListRevokedTokens] " + req.String())
 	var tokens []string
 
 	data := tokenpb.TokensPage{
@@ -109,7 +109,7 @@ func (*TokenServer) ListRevokedTokens(ctx context.Context, req *tokenpb.ListRevo
 }
 
 func (*TokenServer) RevokeFactoryCertificate(ctx context.Context, req *tokenpb.RevokeFactoryCertificateRequest) (*tokenpb.RevokeFactoryCertificateResponse, error) {
-	print("[RevokeFactoryCertificate] " + req.String())
+	println("[RevokeFactoryCertificate] " + req.String())
 
 	response := tokenpb.RevokeFactoryCertificateResponse{}
 
@@ -117,7 +117,7 @@ func (*TokenServer) RevokeFactoryCertificate(ctx context.Context, req *tokenpb.R
 }
 
 func (*TokenServer) RevokeTokens(ctx context.Context, req *tokenpb.RevokeTokensRequest) (*tokenpb.RevokeTokensResponse, error) {
-	print("[RevokeFactoryCertificate] " + req.String())
+	println("[RevokeFactoryCertificate] " + req.String())
 
 	response := tokenpb.RevokeTokensResponse{
 		TokensRevoked: 0,

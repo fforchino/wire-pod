@@ -35,7 +35,7 @@ func New(opts ...Option) (*JDocsServer, error) {
 
 	s := JDocsServer{}
 
-	print("JDocs server created")
+	println("JDocs server created")
 
 	return &s, nil
 }
@@ -43,7 +43,7 @@ func New(opts ...Option) (*JDocsServer, error) {
 func (*JDocsServer) DeleteDoc(ctx context.Context, req *jdocspb.DeleteDocReq) (*jdocspb.DeleteDocResp, error) {
 	fname := req.GetDocName()
 
-	print("[DeleteDoc] NAME: " + fname + ", USERID: " + req.UserId + ", THING: " + req.Thing)
+	println("[DeleteDoc] NAME: " + fname + ", USERID: " + req.UserId + ", THING: " + req.Thing)
 
 	_ = os.Remove(getDocName(fname, req.UserId, req.Thing))
 
@@ -52,11 +52,13 @@ func (*JDocsServer) DeleteDoc(ctx context.Context, req *jdocspb.DeleteDocReq) (*
 	return &response, nil
 }
 
-func (*JDocsServer) PurgeAccountDocs(context.Context, *jdocspb.PurgeAccountDocsReq) (*jdocspb.PurgeAccountDocsResp, error) {
+func (*JDocsServer) PurgeAccountDocs(ctx context.Context, req *jdocspb.PurgeAccountDocsReq) (*jdocspb.PurgeAccountDocsResp, error) {
+	println("[PurgeAccountDocs] REQ: " + req.String())
 	return nil, status.Errorf(codes.Unimplemented, "method PurgeAccountDocs not implemented")
 }
 
-func (*JDocsServer) ReadDocs(context.Context, *jdocspb.ReadDocsReq) (*jdocspb.ReadDocsResp, error) {
+func (*JDocsServer) ReadDocs(ctx context.Context, req *jdocspb.ReadDocsReq) (*jdocspb.ReadDocsResp, error) {
+	println("[ReadDocs] REQ: " + req.String())
 	return nil, status.Errorf(codes.Unimplemented, "method ReadDocs not implemented")
 }
 
@@ -67,7 +69,7 @@ func (*JDocsServer) WriteDoc(ctx context.Context, req *jdocspb.WriteDocReq) (*jd
 	version := req.GetDoc().GetDocVersion()
 	fileContent := req.GetDoc().JsonDoc
 
-	print("[WriteDoc] NAME: " + fname + ", UID: " + uid + ", THING:" + thing + ", CONTENT: " + fileContent)
+	println("[WriteDoc] NAME: " + fname + ", UID: " + uid + ", THING:" + thing + ", CONTENT: " + fileContent)
 
 	folder := getDocFolder(uid, thing)
 	fc := []byte(fileContent)
@@ -85,7 +87,7 @@ func (*JDocsServer) WriteDoc(ctx context.Context, req *jdocspb.WriteDocReq) (*jd
 func (*JDocsServer) ViewAccountDocs(ctx context.Context, req *jdocspb.ViewAccountDocsReq) (*jdocspb.ViewDocsResp, error) {
 	uid := req.UserId
 
-	print("[ViewAccountDocs] USERID: " + uid)
+	println("[ViewAccountDocs] USERID: " + uid + ", REQ: " + req.String())
 
 	docs := make([]*jdocspb.ViewDoc, 0)
 
@@ -125,7 +127,9 @@ func (*JDocsServer) ViewAccountDocs(ctx context.Context, req *jdocspb.ViewAccoun
 	return &response, nil
 }
 
-func (*JDocsServer) ViewAccountDocsWithPII(context.Context, *jdocspb.ViewAccountDocsReq) (*jdocspb.ViewDocsResp, error) {
+func (*JDocsServer) ViewAccountDocsWithPII(ctx context.Context, req *jdocspb.ViewAccountDocsReq) (*jdocspb.ViewDocsResp, error) {
+	println("[ViewAccountDocs] REQ: " + req.String())
+
 	return nil, status.Errorf(codes.Unimplemented, "method ViewAccountDocsWithPII not implemented")
 }
 
