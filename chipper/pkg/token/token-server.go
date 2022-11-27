@@ -2,6 +2,7 @@ package token
 
 import (
 	"context"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/digital-dream-labs/api/go/tokenpb"
 	"github.com/digital-dream-labs/hugh/log"
@@ -43,6 +44,7 @@ func (*TokenServer) AssociatePrimaryUser(ctx context.Context, req *tokenpb.Assoc
 	response := tokenpb.AssociatePrimaryUserResponse{
 		Data: &data,
 	}
+	println("[AssociatePrimaryUser] Sending response: " + response.String())
 
 	return &response, nil
 }
@@ -131,17 +133,34 @@ func (*TokenServer) RevokeTokens(ctx context.Context, req *tokenpb.RevokeTokensR
 /**********************************************************************************************************************/
 
 func getToken(appId string, clientName string, generateStsToken bool, revokeClientTokens bool, expirationMinutes uint32, sessionCertificate []byte) tokenpb.TokenBundle {
-	sessionToken := jwt.Token{}
 	if expirationMinutes == 0 {
 		expirationMinutes = 120
 	}
 	expiresAt := time.Now().Add(time.Duration(expirationMinutes) * time.Second)
 
+	mySigningKey := []byte("AllYourBase")
+
+	type MyCustomClaims struct {
+		Foo string `json:"foo"`
+		jwt.StandardClaims
+	}
+
+	// Create the Claims
+	claims := MyCustomClaims{
+		"bar",
+		jwt.StandardClaims{
+			ExpiresAt: expiresAt.Unix(),
+			Issuer:    "test",
+		},
+	}
+	sessionToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedString, _ := sessionToken.SignedString(mySigningKey)
+
 	stsToken := tokenpb.StsToken{
-		AccessKeyId:     "",
-		SecretAccessKey: "",
-		SessionToken:    sessionToken.Signature,
-		Expiration:      string(expiresAt.Unix()),
+		AccessKeyId:     "11",
+		SecretAccessKey: "AllYourBase",
+		SessionToken:    signedString,
+		Expiration:      fmt.Sprintf("%d", expiresAt.Unix()),
 	}
 
 	data := tokenpb.TokenBundle{
@@ -149,6 +168,8 @@ func getToken(appId string, clientName string, generateStsToken bool, revokeClie
 		ClientToken: "pallopinco",
 		StsToken:    &stsToken,
 	}
+
+	println("TOKEN BUNDLE: " + data.String())
 
 	return data
 }
