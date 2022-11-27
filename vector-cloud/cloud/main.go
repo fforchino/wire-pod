@@ -6,13 +6,13 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
-	"strings"
-	"io/ioutil"
 
 	"github.com/digital-dream-labs/vector-cloud/internal/clad/cloud"
 	"github.com/digital-dream-labs/vector-cloud/internal/cloudproc"
@@ -24,7 +24,6 @@ import (
 	"github.com/digital-dream-labs/vector-cloud/internal/robot"
 	"github.com/digital-dream-labs/vector-cloud/internal/token"
 	"github.com/digital-dream-labs/vector-cloud/internal/voice"
-
 	"github.com/gwatts/rootcerts"
 )
 
@@ -48,7 +47,7 @@ func getHTTPClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs: rootcerts.ServerCertPool(),
+				RootCAs:            rootcerts.ServerCertPool(),
 				InsecureSkipVerify: true,
 			},
 		},
@@ -77,7 +76,7 @@ func testReader(serv ipc.Server, send voice.MsgSender) {
 
 func main() {
 
-if _, err := os.Stat("/data/data/customCaCert.crt"); err == nil {
+	if _, err := os.Stat("/data/data/customCaCert.crt"); err == nil {
 		certBytes, err := ioutil.ReadFile("/data/data/customCaCert.crt")
 		if err != nil {
 			//nothing
@@ -86,7 +85,7 @@ if _, err := os.Stat("/data/data/customCaCert.crt"); err == nil {
 		var pool = rootcerts.ServerCertPool()
 		var _ = pool.AppendCertsFromPEM([]byte(awesomeCert))
 		log.Println("Loaded custom cert!")
-}
+	}
 	log.Println("Starting up")
 
 	robot.InstallCrashReporter(log.Tag)
