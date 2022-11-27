@@ -1,6 +1,6 @@
 module github.com/digital-dream-labs/chipper
 
-go 1.18
+go 1.15
 
 require (
 	github.com/asticode/go-asticoqui v0.2.0
