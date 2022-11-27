@@ -92,7 +92,7 @@ func customIntentHandler(req interface{}, voiceText string, intentList []string,
 		json.Unmarshal(customIntentJSONFile, &customIntentJSON)
 		for _, c := range customIntentJSON {
 			for _, v := range c.Utterances {
-				//if strings.Contains(voiceText, strings.ToLower(strings.TrimSpace(v))) {				
+				//if strings.Contains(voiceText, strings.ToLower(strings.TrimSpace(v))) {
 				// Check whether the custom sentence is either at the end of the spoken text or space-separated...
 				var seekText = strings.ToLower(strings.TrimSpace(v))
 				if strings.HasSuffix(voiceText, seekText) || strings.Contains(voiceText, seekText+" ") {
@@ -144,6 +144,30 @@ func customIntentHandler(req interface{}, voiceText string, intentList []string,
 	return successMatched
 }
 
+func pluginFunctionHandler(req interface{}, voiceText string, justThisBotNum int, botSerial string) bool {
+	matched := false
+	var intent string
+	for num, array := range PluginUtterances {
+		array := array
+		for _, str := range *array {
+			if strings.Contains(voiceText, str) {
+				logger("Text matched plugin " + PluginNames[num] + ", executing function")
+				intent = PluginFunctions[num](voiceText, botSerial)
+				if intent == "" {
+					intent = "intent_imperative_praise"
+				}
+				IntentPass(req, intent, voiceText, make(map[string]string), false, justThisBotNum)
+				matched = true
+				break
+			}
+		}
+		if matched {
+			break
+		}
+	}
+	return matched
+}
+
 func processTextAll(req interface{}, voiceText string, listOfLists [][]string, intentList []string, isOpus bool, justThisBotNum int) bool {
 	var botSerial string
 	var req2 *vtt.IntentRequest
@@ -162,13 +186,14 @@ func processTextAll(req interface{}, voiceText string, listOfLists [][]string, i
 	var matched int = 0
 	var intentNum int = 0
 	var successMatched bool = false
+	pluginMatched := pluginFunctionHandler(req, voiceText, justThisBotNum, botSerial)
 	customIntentMatched := customIntentHandler(req, voiceText, intentList, isOpus, justThisBotNum, botSerial)
-	if !customIntentMatched {
-	    logger("Not a custom intent")
+	if !customIntentMatched && !pluginMatched {
+		logger("Not a custom intent")
 		// Look for a perfect match first
 		for _, b := range listOfLists {
 			for _, c := range b {
-				if voiceText==c {
+				if voiceText == c {
 					if isOpus {
 						paramChecker(req, intentList[intentNum], voiceText, justThisBotNum, botSerial)
 					} else {
@@ -186,9 +211,9 @@ func processTextAll(req interface{}, voiceText string, listOfLists [][]string, i
 			intentNum = intentNum + 1
 		}
 		// Not found? Then let's be happy with a bare substring search
-		if (successMatched == false) {
-			intentNum = 0;
-			matched = 0;
+		if !successMatched {
+			intentNum = 0
+			matched = 0
 			for _, b := range listOfLists {
 				for _, c := range b {
 					if strings.Contains(voiceText, c) {
@@ -207,10 +232,10 @@ func processTextAll(req interface{}, voiceText string, listOfLists [][]string, i
 					break
 				}
 				intentNum = intentNum + 1
-			}		
+			}
 		}
 	} else {
-	    logger("This is a custom intent!")
+		logger("This is a custom intent or plugin!")
 		successMatched = true
 	}
 	return successMatched
