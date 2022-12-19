@@ -96,6 +96,7 @@ func kgRequestHandler(req SpeechRequest) (string, error) {
 				Prompt: []string{"Q:" + question + "\nA: "},
 			})
 			if err == nil {
+				logger("OPENAI Answer: " + resp.Choices[0].Text)
 				transcribedText = resp.Choices[0].Text
 			} else {
 				logger(err)
