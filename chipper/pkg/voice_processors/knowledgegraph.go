@@ -88,6 +88,7 @@ func kgRequestHandler(req SpeechRequest) (string, error) {
 		}
 	} else if OpenAIEnable {
 		// Use TTS to decode mic data
+		logger("OpenAI. Let's try to decode question speech to text using VOSK.")
 		question, err := VoskSTTHandler(req)
 		if err == nil {
 			logger("Decoded question: " + question)
@@ -100,6 +101,8 @@ func kgRequestHandler(req SpeechRequest) (string, error) {
 				logger(err)
 				transcribedText = ""
 			}
+		} else {
+			logger("Decoding question failed")
 		}
 	} else {
 		transcribedText = "Houndify is not enabled."
@@ -155,7 +158,9 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 	speechReq := reqToSpeechRequest(req)
 	speechReq.BotNum = botNum
 	var err error
-	speechReq, err = kgVADHandler(speechReq)
+	if HoundEnable {
+		speechReq, err = kgVADHandler(speechReq)
+	}
 	apiResponse, _ := kgRequestHandler(speechReq)
 	if err != nil {
 		logger(err)
