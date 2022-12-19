@@ -635,7 +635,7 @@ function makeSource() {
 		echo "export OPENAI_ENABLED=false" >>source.sh
 		echo "export HOUNDIFY_CLIENT_KEY=${knowledgeKey}" >>source.sh
 		echo "export HOUNDIFY_CLIENT_ID=${knowledgeID}" >>source.sh
-	else if [[ ${knowledgeSetup} == "2" ]]; then
+	elif [[ ${knowledgeSetup} == "2" ]]; then
 		echo "export HOUNDIFY_ENABLED=false" >>source.sh
 		echo "export OPENAI_ENABLED=true" >>source.sh
 		echo "export OPENAI_API_KEY=${openAIKey}" >>source.sh
