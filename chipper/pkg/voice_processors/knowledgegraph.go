@@ -88,12 +88,14 @@ func kgRequestHandler(req SpeechRequest) (string, error) {
 		}
 	} else if OpenAIEnable {
 		// Use TTS to decode mic data
-		logger("OpenAI. Let's try to decode question speech to text using VOSK.")
-		question, err := VoskSTTHandler(req)
+		logger("OpenAI. Let's try to decode question speech to text using the our STT engine.")
+		question, err := sttHandler(req)
 		if err == nil {
 			logger("Decoded question: " + question)
+			var temperature float32 = 0.2
 			resp, err := OpenAIClient.Completion(context.Background(), gpt3.CompletionRequest{
-				Prompt: []string{"Q:" + question + "? \nA: "},
+				Prompt:      []string{"Q:" + question + "? \nA: "},
+				Temperature: &temperature,
 			})
 			if err == nil {
 				logger("OPENAI Answer: " + resp.Choices[0].Text)
