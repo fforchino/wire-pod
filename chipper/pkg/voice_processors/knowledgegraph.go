@@ -92,10 +92,13 @@ func kgRequestHandler(req SpeechRequest) (string, error) {
 		question, err := sttHandler(req)
 		if err == nil {
 			logger("Decoded question: " + question)
-			var temperature float32 = 0.2
+			var temperature float32 = 0
+			var topP float32 = 1
 			resp, err := OpenAIClient.Completion(context.Background(), gpt3.CompletionRequest{
 				Prompt:      []string{"Q:" + question + "? \nA: "},
 				Temperature: &temperature,
+				TopP:        &topP,
+				Stop:        []string{"\n"},
 			})
 			if err == nil {
 				logger("OPENAI Answer: " + resp.Choices[0].Text)
