@@ -3,17 +3,17 @@ package wirepod
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
-	"os"
-	"strconv"
-	"strings"
-
 	gpt3 "github.com/PullRequestInc/go-gpt3"
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 	"github.com/maxhawkins/go-webrtcvad"
 	"github.com/pkg/errors"
 	"github.com/soundhound/houndify-sdk-go"
+	"os"
+	"strconv"
+	"strings"
 )
 
 var HKGclient houndify.Client
@@ -102,14 +102,15 @@ func kgRequestHandler(req SpeechRequest) (string, error) {
 				Temperature: &temperature,
 				TopP:        &topP,
 				MaxTokens:   &maxLen,
-				Stop:        []string{"\n\n"},
+				Stop:        []string{"\n"},
 			})
 			if err == nil {
-				var openAIAnswer = strings.TrimLeft(resp.Choices[0].Text, " ")
-				logger("OPENAI Answer: " + openAIAnswer)
-				if strings.Contains(openAIAnswer, "\n") {
-					openAIAnswer = strings.Split(openAIAnswer, "\n")[0]
+				logger("OPENAI Answer: '" + resp.Choices[0].Text + "'")
+				var openAIAnswer = cleanup(resp.Choices[0].Text)
+				if openAIAnswer == "" {
+					openAIAnswer = "I wasn't able to figure out."
 				}
+				logger("Short answer: " + openAIAnswer)
 				transcribedText = openAIAnswer
 			} else {
 				logger(err)
@@ -119,8 +120,8 @@ func kgRequestHandler(req SpeechRequest) (string, error) {
 			logger("Decoding question failed")
 		}
 	} else {
-		transcribedText = "Houndify is not enabled."
-		logger("Houndify is not enabled.")
+		transcribedText = "Neither Houndify nor OpenAI are enabled."
+		logger("Neither Houndify nor OpenAI are enabled.")
 	}
 	return transcribedText, nil
 }
@@ -202,10 +203,23 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 	botNum = botNum - 1
 	logger("(KG) Bot " + strconv.Itoa(speechReq.BotNum) + " request served.")
 	if err := req.Stream.Send(&kg); err != nil {
+		logger(err.Error())
 		return nil, err
 	}
 	return &vtt.KnowledgeGraphResponse{
 		Intent: &kg,
 	}, nil
 
+}
+
+func cleanup(text string) string {
+	// It seems that answers start with this strange 0xC2A0 character that breaks everything...
+	str, _ := hex.DecodeString("C2A0")
+	text = strings.ReplaceAll(text, string(str), "")
+
+	// If multiline, just pick the first one
+	if strings.Contains(text, "\n") {
+		text = strings.Split(text, "\n")[0]
+	}
+	return text
 }
