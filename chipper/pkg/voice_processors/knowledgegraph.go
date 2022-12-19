@@ -2,11 +2,13 @@ package wirepod
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"os"
 	"strconv"
 	"strings"
 
+	gpt3 "github.com/PullRequestInc/go-gpt3"
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 	"github.com/maxhawkins/go-webrtcvad"
@@ -15,7 +17,9 @@ import (
 )
 
 var HKGclient houndify.Client
+var OpenAIClient gpt3.Client
 var HoundEnable bool = true
+var OpenAIEnable bool = true
 
 func ParseSpokenResponse(serverResponseJSON string) (string, error) {
 	result := make(map[string]interface{})
@@ -33,7 +37,7 @@ func ParseSpokenResponse(serverResponseJSON string) (string, error) {
 	return result["AllResults"].([]interface{})[0].(map[string]interface{})["SpokenResponseLong"].(string), nil
 }
 
-func InitHoundify() {
+func InitKnowledgeGraph() {
 	if os.Getenv("HOUNDIFY_CLIENT_ID") == "" {
 		logger("Houndify Client ID not provided.")
 		HoundEnable = false
@@ -42,6 +46,11 @@ func InitHoundify() {
 		logger("Houndify Client Key not provided.")
 		HoundEnable = false
 	}
+	if os.Getenv("OPENAI_API_KEY") == "" {
+		logger("OpenAI API KEY not provided.")
+		OpenAIEnable = false
+	}
+
 	if HoundEnable {
 		HKGclient = houndify.Client{
 			ClientID:  os.Getenv("HOUNDIFY_CLIENT_ID"),
@@ -49,6 +58,9 @@ func InitHoundify() {
 		}
 		HKGclient.EnableConversationState()
 		logger("Houndify for knowledge graph initialized!")
+	} else if OpenAIEnable {
+		OpenAIClient = gpt3.NewClient(os.Getenv("OPENAI_API_KEY"))
+		logger("OpenAI GPT3 for knowledge graph initialized!")
 	}
 }
 
@@ -73,6 +85,21 @@ func kgRequestHandler(req SpeechRequest) (string, error) {
 			}
 			transcribedText, _ = ParseSpokenResponse(serverResponse)
 			logger("Transcribed text: " + transcribedText)
+		}
+	} else if OpenAIEnable {
+		// Use TTS to decode mic data
+		question, err := VoskSTTHandler(req)
+		if err == nil {
+			logger("Decoded question: " + question)
+			resp, err := OpenAIClient.Completion(context.Background(), gpt3.CompletionRequest{
+				Prompt: []string{"Q:" + question + "\nA: "},
+			})
+			if err == nil {
+				transcribedText = resp.Choices[0].Text
+			} else {
+				logger(err)
+				transcribedText = ""
+			}
 		}
 	} else {
 		transcribedText = "Houndify is not enabled."

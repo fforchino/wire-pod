@@ -540,27 +540,33 @@ function makeSource() {
 		}
 		weatherUnitPrompt
 	fi
-	function houndifyPrompt() {
+	function kgPrompt() {
 		echo
-		echo "Would you like to setup knowledge graph (I have a question) commands? This involves creating a free account at https://www.houndify.com/signup and putting in your Client Key and Client ID."
+		echo "Would you like to setup knowledge graph (I have a question) commands? "
+		echo "This involves either:"
+		echo "(1/HOUNDIFY) creating a free account at https://www.houndify.com/signup and putting in your Client Key and Client ID."
 		echo "Note: It may seem like you only get a trial, but there is an actual free tier with 100 free requests per day."
-		echo "This is not required, and if you choose 2 then placeholder values will be used. And if you change your mind later, just run ./setup.sh with the 5th option."
+		echo "Or:"
+		echo "(2/OPENAI) creating a free account at https://openai.com"
+		echo "This is not required, and if you choose 3 then placeholder values will be used. And if you change your mind later, just run ./setup.sh with the 5th option."
 		echo
-		echo "1: Yes"
-		echo "2: No"
-		read -p "Enter a number (2): " yn
+		echo "1: Yes, and use Houndify"
+		echo "2: Yes, and use OpenAI"
+		echo "3: No"
+		read -p "Enter a number (3): " yn
 		case $yn in
-		"1") knowledgeSetup="true" ;;
-		"2") knowledgeSetup="false" ;;
+		"1") knowledgeSetup="1" ;;
+		"2") knowledgeSetup="2" ;;
+		"3") knowledgeSetup="false" ;;
 		"") knowledgeSetup="false" ;;
 		*)
-			echo "Please answer with 1 or 2."
-			houndifyPrompt
+			echo "Please answer with 1, 2 or 3."
+			kgPrompt
 			;;
 		esac
 	}
-	houndifyPrompt
-	if [[ ${knowledgeSetup} == "true" ]]; then
+	kgPrompt
+	if [[ ${knowledgeSetup} == "1" ]]; then
 		function houndifyIDPrompt() {
 			echo
 			echo "Create an account at https://www.houndify.com/signup and enter the Client ID (not Key) it gives you."
@@ -589,9 +595,23 @@ function makeSource() {
 			fi
 		}
 		houndifyIDPrompt
-		if [[ ${knowledgeSetup} == "true" ]]; then
+		if [[ ${knowledgeSetup} != "false" ]]; then
 			houndifyKeyPrompt
 		fi
+	elif [[ ${knowledgeSetup} == "2" ]]; then
+    function openAIKeyPrompt() {
+  			echo
+  			echo "Please enter the OpenAi Secret Key."
+  			echo
+  			read -p "Enter your OpenAI Secret Key: " openAIKey
+  			if [[ ! -n ${openAIKey} ]]; then
+  				echo "You must enter an OpenAI API Key."
+  				openAIKeyPrompt
+  			fi
+  			if [[ ${openAIKey} == "Q" ]]; then
+  				knowledgeSetup="false"
+  			fi
+  		}
 	fi
 	echo "export DDL_RPC_PORT=${port}" >source.sh
 	if [[ ! -f ./useepod ]]; then
@@ -610,10 +630,15 @@ function makeSource() {
 	else
 		echo "export WEATHERAPI_ENABLED=false" >>source.sh
 	fi
-	if [[ ${knowledgeSetup} == "true" ]]; then
+	if [[ ${knowledgeSetup} == "1" ]]; then
 		echo "export HOUNDIFY_ENABLED=true" >>source.sh
+		echo "export OPENAI_ENABLED=false" >>source.sh
 		echo "export HOUNDIFY_CLIENT_KEY=${knowledgeKey}" >>source.sh
 		echo "export HOUNDIFY_CLIENT_ID=${knowledgeID}" >>source.sh
+	else if [[ ${knowledgeSetup} == "2" ]]; then
+		echo "export HOUNDIFY_ENABLED=false" >>source.sh
+		echo "export OPENAI_ENABLED=true" >>source.sh
+		echo "export OPENAI_API_KEY=${openAIKey}" >>source.sh
 	else
 		echo "export HOUNDIFY_ENABLED=false" >>source.sh
 	fi

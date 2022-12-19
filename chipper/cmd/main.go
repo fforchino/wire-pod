@@ -66,7 +66,7 @@ func startServer() {
 
 	p, err := wp.New(wp.VoiceProcessorCoqui)
 	go wp.StartWebServer()
-	wp.InitHoundify()
+	wp.InitKnowledgeGraph()
 	go sdkWeb.BeginServer()
 	if err != nil {
 		log.Fatal(err)
