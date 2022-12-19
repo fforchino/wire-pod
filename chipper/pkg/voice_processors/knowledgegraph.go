@@ -105,8 +105,12 @@ func kgRequestHandler(req SpeechRequest) (string, error) {
 				Stop:        []string{"\n\n"},
 			})
 			if err == nil {
-				logger("OPENAI Answer: " + resp.Choices[0].Text)
-				transcribedText = strings.TrimLeft(resp.Choices[0].Text, " ")
+				var openAIAnswer = strings.TrimLeft(resp.Choices[0].Text, " ")
+				logger("OPENAI Answer: " + openAIAnswer)
+				if strings.Contains(openAIAnswer, "\n") {
+					openAIAnswer = strings.Split(openAIAnswer, "\n")[0]
+				}
+				transcribedText = openAIAnswer
 			} else {
 				logger(err)
 				transcribedText = ""
