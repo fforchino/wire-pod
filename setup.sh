@@ -612,6 +612,7 @@ function makeSource() {
   				knowledgeSetup="false"
   			fi
   		}
+		openAIKeyPrompt
 	fi
 	echo "export DDL_RPC_PORT=${port}" >source.sh
 	if [[ ! -f ./useepod ]]; then
