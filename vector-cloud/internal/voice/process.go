@@ -139,9 +139,10 @@ func (c *strmReceiver) Close() {
 }
 
 func triggerHotWord(p *Process) {
-	hw := cloud.Hotword{Mode: cloud.StreamType_Normal, Locale: "en-US", Timezone: "", NoLogging: true}
+	location_currentzone, _ := time.LoadLocation("Local")
+	hw := cloud.Hotword{Mode: cloud.StreamType_Normal, Locale: "en-US", Timezone: location_currentzone.String(), NoLogging: true}
 	message := cloud.NewMessageWithHotword(&hw)
-	p.msg <- messageEvent{msg: message, isTest: r.isTest}
+	p.msg <- messageEvent{msg: message, isTest: false}
 }
 
 // Run starts the cloud process, which will run until stopped on the given channel
