@@ -172,7 +172,6 @@ func (p *Process) Run(ctx context.Context, options ...Option) {
 
 	var strm *stream.Streamer
 
-	triggerHotWord(p)
 procloop:
 	for {
 		// the cases in this select should NOT block! if messages that others send us
