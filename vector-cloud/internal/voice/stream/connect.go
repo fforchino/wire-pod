@@ -26,6 +26,7 @@ const (
 )
 
 func (strm *Streamer) newChipperConn(ctx context.Context) (Conn, *CloudError) {
+	log.Println("newChipperConn start")
 	if strm.opts.checkOpts != nil {
 		// for connection check, first try the connection check URL with no tls
 		esn, _ := robot.ReadESN()
@@ -54,7 +55,7 @@ func (strm *Streamer) newChipperConn(ctx context.Context) (Conn, *CloudError) {
 		httpsClient := &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
-					RootCAs: rootcerts.ServerCertPool(),
+					RootCAs:            rootcerts.ServerCertPool(),
 					InsecureSkipVerify: true,
 				},
 			},

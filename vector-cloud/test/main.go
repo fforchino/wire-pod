@@ -18,7 +18,7 @@ func TriggerWakeWord() {
 
 	location_currentzone, _ := time.LoadLocation("Europe/Paris")
 	log.Println("Triggering hotword: " + location_currentzone.String())
-	hw := cloud.Hotword{Mode: cloud.StreamType_Normal, Locale: "en-US", Timezone: location_currentzone.String(), NoLogging: true}
+	hw := cloud.Hotword{Mode: cloud.StreamType_Normal, Locale: "en-US", Timezone: location_currentzone.String(), NoLogging: false}
 	message := cloud.NewMessageWithHotword(&hw)
 
 	log.Println("Creating sender")
