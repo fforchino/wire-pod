@@ -183,6 +183,7 @@ procloop:
 
 				// if this is from a test receiver, notify the mic to send the AI a hotword on our behalf
 				if msg.isTest {
+					log.Println("Notify AI of test message")
 					p.writeMic(cloud.NewMessageWithTestStarted(&cloud.Void{}))
 				}
 
@@ -240,6 +241,7 @@ procloop:
 				}
 
 			case cloud.MessageTag_Audio:
+				logVerbose("Received audio chunk")
 				// add samples to our buffer
 				buf := msg.msg.GetAudio().Data
 				if strm != nil {
