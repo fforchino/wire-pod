@@ -16,7 +16,7 @@ func TriggerWakeWord() {
 	defer cloudSock.Close()
 	log.Println("Socket created")
 
-	location_currentzone, _ := time.LoadLocation("Local")
+	location_currentzone, _ := time.LoadLocation("Europe/Paris")
 	log.Println("Triggering hotword: " + location_currentzone.String())
 	hw := cloud.Hotword{Mode: cloud.StreamType_Normal, Locale: "en-US", Timezone: location_currentzone.String(), NoLogging: true}
 	message := cloud.NewMessageWithHotword(&hw)

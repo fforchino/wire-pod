@@ -29,7 +29,7 @@ testapp: go_deps
 	-w /go/src/digital-dream-labs/vector-cloud \
 	--user $(UID):$(GID) \
 	armbuilder \
-	upx build/vic-cloud
+	upx build/testapp
 
 vic-cloud: go_deps
 	mkdir -p build
