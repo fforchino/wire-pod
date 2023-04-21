@@ -182,7 +182,8 @@ procloop:
 				}
 
 				// if this is from a test receiver, notify the mic to send the AI a hotword on our behalf
-				if msg.isTest {
+				/*if msg.isTest*/
+				{
 					log.Println("Notify AI of test message")
 					p.writeMic(cloud.NewMessageWithTestStarted(&cloud.Void{}))
 				}

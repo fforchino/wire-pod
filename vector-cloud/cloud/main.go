@@ -179,6 +179,7 @@ func main() {
 	process := &voice.Process{}
 	process.AddReceiver(receiver)
 	if testRecv != nil {
+		log.Println("Added test receiver")
 		process.AddTestReceiver(testRecv)
 	}
 	process.AddIntentWriter(&voice.IPCMsgSender{Conn: aiSock})
