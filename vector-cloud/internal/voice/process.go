@@ -138,14 +138,6 @@ func (c *strmReceiver) Close() {
 	}
 }
 
-func triggerHotWord(p *Process) {
-	location_currentzone, _ := time.LoadLocation("Local")
-	log.Println("Triggering hotword: " + location_currentzone.String())
-	hw := cloud.Hotword{Mode: cloud.StreamType_Normal, Locale: "en-US", Timezone: location_currentzone.String(), NoLogging: true}
-	message := cloud.NewMessageWithHotword(&hw)
-	p.msg <- messageEvent{msg: message, isTest: false}
-}
-
 // Run starts the cloud process, which will run until stopped on the given channel
 func (p *Process) Run(ctx context.Context, options ...Option) {
 	if verbose {
@@ -294,7 +286,6 @@ procloop:
 				log.Println("Error closing context:")
 			}
 			strm = nil
-			triggerHotWord(p)
 		case err := <-cloudChans.err:
 			if err.recvr.stream != strm {
 				log.Println("Ignoring error from prior stream:", err.err)
@@ -310,8 +301,6 @@ procloop:
 				log.Println("Error closing context:")
 			}
 			strm = nil
-			triggerHotWord(p)
-
 		case open := <-cloudChans.open:
 			if open.recvr.stream != strm {
 				log.Println("Ignoring stream open from prior stream:", open.session)

@@ -133,7 +133,7 @@ func main() {
 	signalHandler()
 
 	// don't yet have control over process startup on DVT2, set these as default
-	test := false
+	test := true
 
 	var verbose bool
 	flag.BoolVar(&verbose, "verbose", true, "enable verbose logging")
