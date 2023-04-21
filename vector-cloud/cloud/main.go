@@ -68,6 +68,7 @@ func testReader(serv ipc.Server, send voice.MsgSender) {
 					log.Println("Test reader unpack error:", err)
 					continue
 				}
+				log.Println("testReader received a message of type :", cmsg.Tag().String())
 				send.Send(&cmsg)
 			}
 		}(conn)

@@ -171,6 +171,7 @@ procloop:
 		// are not promptly read, socket buffers can fill up and break voice processing
 		select {
 		case msg := <-p.msg:
+			log.Println("ic-cloud processing message of type: " + msg.msg.Tag().String())
 			switch msg.msg.Tag() {
 			case cloud.MessageTag_Hotword:
 				// hotword = get ready to stream data
