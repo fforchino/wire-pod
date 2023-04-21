@@ -136,7 +136,7 @@ func main() {
 	test := false
 
 	var verbose bool
-	flag.BoolVar(&verbose, "verbose", false, "enable verbose logging")
+	flag.BoolVar(&verbose, "verbose", true, "enable verbose logging")
 	// var test bool
 	// flag.BoolVar(&test, "test", false, "enable test channel")
 

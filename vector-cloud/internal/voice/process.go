@@ -140,6 +140,7 @@ func (c *strmReceiver) Close() {
 
 func triggerHotWord(p *Process) {
 	location_currentzone, _ := time.LoadLocation("Local")
+	log.Println("Triggering hotword: " + location_currentzone.String())
 	hw := cloud.Hotword{Mode: cloud.StreamType_Normal, Locale: "en-US", Timezone: location_currentzone.String(), NoLogging: true}
 	message := cloud.NewMessageWithHotword(&hw)
 	p.msg <- messageEvent{msg: message, isTest: false}
