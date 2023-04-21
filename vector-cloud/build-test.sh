@@ -7,7 +7,7 @@ if [[ "${UNAME}" == *"armv7l"* ]]; then
 	-tags nolibopusfile,vicos \
 	--trimpath \
 	-ldflags '-w -s -linkmode internal -extldflags "-static" -r /anki/lib' \
-	-o build/vic-cloud \
+	-o build/testapp \
 	test/main.go
 else
 	echo "Building testapp (docker)..."
