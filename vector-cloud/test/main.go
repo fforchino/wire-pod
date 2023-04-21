@@ -12,7 +12,7 @@ func TriggerWakeWord() {
 	var cloudSock ipc.Conn
 
 	log.Println("Creating Test Client Socket to send messages to vic-cloud")
-	cloudSock = getSocketWithRetry(ipc.GetSocketPath("cloud_sock"), "cp_test")
+	cloudSock = getSocketWithRetry(ipc.GetSocketPath("cp_test"), "cp_test_client")
 	defer cloudSock.Close()
 	log.Println("Socket created")
 
