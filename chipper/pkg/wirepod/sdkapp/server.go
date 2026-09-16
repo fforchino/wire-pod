@@ -318,6 +318,19 @@ func SdkapiHandler(w http.ResponseWriter, r *http.Request) {
 		//robots[robotIndex].CamStreaming = true
 		fmt.Fprint(w, "done")
 		return
+	case r.URL.Path == "/api-sdk/camera_frame":
+		resp, err := robot.Conn.CaptureSingleImage(
+			ctx,
+			&vectorpb.CaptureSingleImageRequest{EnableHighResolution: false},
+		)
+		if err != nil {
+			http.Error(w, "error: "+err.Error(), http.StatusBadGateway)
+			return
+		}
+		w.Header().Set("Content-Type", "image/jpeg")
+		w.Header().Set("Cache-Control", "no-store")
+		_, _ = w.Write(resp.GetData())
+		return
 	case r.URL.Path == "/api-sdk/stop_cam_stream":
 		robots[robotIndex].CamStreaming = false
 		fmt.Fprint(w, "done")
@@ -413,59 +426,75 @@ func SdkapiHandler(w http.ResponseWriter, r *http.Request) {
 func camStreamHandler(w http.ResponseWriter, r *http.Request) {
 	robotObj, robotIndex, err := getRobot(r.FormValue("serial"))
 	if err != nil {
-		fmt.Fprint(w, "error: "+err.Error())
+		http.Error(w, "error: "+err.Error(), http.StatusBadGateway)
 		return
 	}
 	if robots[robotIndex].CamStreaming {
 		robots[robotIndex].CamStreaming = false
 		time.Sleep(time.Second / 2)
 	}
-	robotObj.Vector.Conn.EnableImageStreaming(
+	// Always reset the robot-side stream. A browser refresh or a disconnected
+	// proxy can otherwise leave Vector accepting the RPC but sending no frames.
+	_, _ = robotObj.Vector.Conn.EnableImageStreaming(
 		robotObj.Ctx,
-		&vectorpb.EnableImageStreamingRequest{
-			Enable: true,
-		},
+		&vectorpb.EnableImageStreamingRequest{Enable: false},
 	)
+	time.Sleep(time.Second / 4)
+	_, err = robotObj.Vector.Conn.EnableImageStreaming(
+		robotObj.Ctx,
+		&vectorpb.EnableImageStreamingRequest{Enable: true},
+	)
+	if err != nil {
+		http.Error(w, "error: "+err.Error(), http.StatusBadGateway)
+		return
+	}
 	var client vectorpb.ExternalInterface_CameraFeedClient
 	client, err = robotObj.Vector.Conn.CameraFeed(
 		robotObj.Ctx,
 		&vectorpb.CameraFeedRequest{},
 	)
 	if err != nil {
-		fmt.Fprint(w, "error: "+err.Error())
+		http.Error(w, "error: "+err.Error(), http.StatusBadGateway)
 		return
 	}
-	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=--boundary")
-	multi := io.MultiWriter(w)
+	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusOK)
+	if flusher, ok := w.(http.Flusher); ok {
+		flusher.Flush()
+	}
 	robots[robotIndex].CamStreaming = true
+	defer func() {
+		robots[robotIndex].CamStreaming = false
+		_, _ = robotObj.Vector.Conn.EnableImageStreaming(robotObj.Ctx, &vectorpb.EnableImageStreamingRequest{Enable: false})
+	}()
 	for {
 		select {
 		case <-r.Context().Done():
-			robotObj.Vector.Conn.EnableImageStreaming(
-				robotObj.Ctx,
-				&vectorpb.EnableImageStreamingRequest{
-					Enable: false,
-				},
-			)
-			robots[robotIndex].CamStreaming = false
 			return
 		default:
-			if robots[robotIndex].CamStreaming {
-				response, err := client.Recv()
-				if err == nil {
-					imageBytes := response.GetData()
-					img, _, _ := image.Decode(bytes.NewReader(imageBytes))
-					fmt.Fprintf(multi, "--boundary\r\nContent-Type: image/jpeg\r\n\r\n")
-					jpeg.Encode(multi, img, nil)
-				}
-			} else {
-				robotObj.Vector.Conn.EnableImageStreaming(
-					robotObj.Ctx,
-					&vectorpb.EnableImageStreamingRequest{
-						Enable: false,
-					},
-				)
+			if !robots[robotIndex].CamStreaming {
 				return
+			}
+			response, err := client.Recv()
+			if err != nil {
+				logger.Println("Camera stream ended: " + err.Error())
+				return
+			}
+			img, _, err := image.Decode(bytes.NewReader(response.GetData()))
+			if err != nil {
+				logger.Println("Could not decode camera frame: " + err.Error())
+				continue
+			}
+			var frame bytes.Buffer
+			if err := jpeg.Encode(&frame, img, nil); err != nil {
+				continue
+			}
+			fmt.Fprintf(w, "--frame\r\nContent-Type: image/jpeg\r\nContent-Length: %d\r\n\r\n", frame.Len())
+			_, _ = io.Copy(w, &frame)
+			_, _ = fmt.Fprint(w, "\r\n")
+			if flusher, ok := w.(http.Flusher); ok {
+				flusher.Flush()
 			}
 		}
 	}

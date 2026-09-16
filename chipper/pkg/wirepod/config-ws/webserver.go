@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -349,7 +350,16 @@ func StartWebServer() {
 	http.HandleFunc("/api/", apiHandler)
 	http.HandleFunc("/session-certs/", certHandler)
 	webRoot := http.FileServer(http.Dir("./webroot"))
-	http.Handle("/", webRoot)
+	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Port 80 remains Wire-Pod's robot connection-check endpoint. Human
+		// browser traffic on that port should enter the VectorX control panel.
+		_, port, err := net.SplitHostPort(r.Host)
+		if err != nil || port == "80" {
+			http.Redirect(w, r, "http://escapepod.local:8080"+r.URL.RequestURI(), http.StatusTemporaryRedirect)
+			return
+		}
+		webRoot.ServeHTTP(w, r)
+	}))
 	if os.Getenv("WEBSERVER_PORT") != "" {
 		if _, err := strconv.Atoi(os.Getenv("WEBSERVER_PORT")); err == nil {
 			webPort = os.Getenv("WEBSERVER_PORT")
